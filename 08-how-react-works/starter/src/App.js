@@ -19,6 +19,7 @@ const content = [
 ];
 
 export default function App() {
+  console.dir((<DifferentContent />)["type"]);
   return (
     <div>
       <Tabbed content={content} />
@@ -92,6 +93,7 @@ function TabContent({ item }) {
 }
 
 function DifferentContent() {
+  const [count, setCount] = useState(0);
   return (
     <div className="tab-content">
       <h4>I'm a DIFFERENT tab, so I reset state 💣💥</h4>

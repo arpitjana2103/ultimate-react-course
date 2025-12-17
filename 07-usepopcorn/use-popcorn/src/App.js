@@ -48,6 +48,9 @@ const tempWatchedData = [
     },
 ];
 
+const KEY = `d372492d`;
+const baseURL = `http://img.omdbapi.com/?apikey=${KEY}&`;
+
 export default function App() {
     const [movies, setMovies] = useState(tempMovieData);
     const [watched, setWatched] = useState(tempWatchedData);
