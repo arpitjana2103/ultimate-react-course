@@ -55,32 +55,44 @@ export default function App() {
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
     const [isLoading, setLoading] = useState(false);
-    const query = "spider";
+    const [query, setQuery] = useState("spider");
+    const [error, setError] = useState(null);
 
-    useEffect(function () {
-        setLoading(true);
-        const fetchMovies = async function () {
-            console.log(`${baseURL}&s=${query}`);
-            const res = await fetch(`${baseURL}&s=${query}`);
-            const data = await res.json();
-            const movies = data.Search;
-            setMovies(movies);
-            setLoading(false);
-        };
-        fetchMovies();
-    }, []);
+    useEffect(
+        function () {
+            const fetchMovies = async function () {
+                setLoading(true);
+                setError(null);
+                try {
+                    const res = await fetch(`${baseURL}&s=${query}`);
+                    const data = await res.json();
+                    const movies = data.Search;
+                    if (!movies) throw new Error("😵‍💫 Movie Not Found");
+                    setMovies(movies);
+                } catch (error) {
+                    setError(error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            if (query.length > 3) fetchMovies();
+        },
+        [query]
+    );
 
     return (
         <>
             <NavBar>
                 <Logo />
-                <SearchBox />
+                <SearchBox query={query} onQueryChange={setQuery} />
                 <MovieLength movies={movies} />
             </NavBar>
             <Main>
                 <Box>
                     {isLoading && <Loader />}
-                    {!isLoading && <MoviesList movies={movies} />}
+                    {error && <ErrorMessage errorText={error} />}
+                    {!isLoading && !error && <MoviesList movies={movies} />}
                 </Box>
                 <Box>
                     <WatchedMovieSummery watched={watched} />
@@ -92,7 +104,19 @@ export default function App() {
 }
 
 function Loader() {
-    return <div className="loader">Loading...</div>;
+    return (
+        <div className="middle-container">
+            <div className="loader"></div>
+        </div>
+    );
+}
+
+function ErrorMessage({ errorText }) {
+    return (
+        <div className="middle-container">
+            <h1>{errorText}</h1>
+        </div>
+    );
 }
 
 function NavBar({ children }) {

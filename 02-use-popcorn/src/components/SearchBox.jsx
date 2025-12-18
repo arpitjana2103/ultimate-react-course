@@ -1,14 +1,13 @@
 import { useState } from "react";
 
-function SearchBox() {
-    const [query, setQuery] = useState("");
+function SearchBox({ query, onQueryChange }) {
     return (
         <input
             className="search"
             type="text"
             placeholder="Search movies..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => onQueryChange(e.target.value)}
         />
     );
 }
