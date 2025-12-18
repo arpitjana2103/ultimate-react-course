@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "./components/Logo";
 import SearchBox from "./components/SearchBox";
 import MovieLength from "./components/MovieLength";
@@ -49,11 +49,26 @@ const tempWatchedData = [
 ];
 
 const KEY = `d372492d`;
-const baseURL = `http://img.omdbapi.com/?apikey=${KEY}&`;
+const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
 
 export default function App() {
-    const [movies, setMovies] = useState(tempMovieData);
-    const [watched, setWatched] = useState(tempWatchedData);
+    const [movies, setMovies] = useState([]);
+    const [watched, setWatched] = useState([]);
+    const [isLoading, setLoading] = useState(false);
+    const query = "spider";
+
+    useEffect(function () {
+        setLoading(true);
+        const fetchMovies = async function () {
+            console.log(`${baseURL}&s=${query}`);
+            const res = await fetch(`${baseURL}&s=${query}`);
+            const data = await res.json();
+            const movies = data.Search;
+            setMovies(movies);
+            setLoading(false);
+        };
+        fetchMovies();
+    }, []);
 
     return (
         <>
@@ -64,7 +79,8 @@ export default function App() {
             </NavBar>
             <Main>
                 <Box>
-                    <MoviesList movies={movies} />
+                    {isLoading && <Loader />}
+                    {!isLoading && <MoviesList movies={movies} />}
                 </Box>
                 <Box>
                     <WatchedMovieSummery watched={watched} />
@@ -73,6 +89,10 @@ export default function App() {
             </Main>
         </>
     );
+}
+
+function Loader() {
+    return <div className="loader">Loading...</div>;
 }
 
 function NavBar({ children }) {
