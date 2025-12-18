@@ -5,6 +5,8 @@ import MovieLength from "./components/MovieLength";
 import MoviesList from "./components/MoviesList";
 import WatchedMovieSummery from "./components/WatchedMovieSummery";
 import WatchedMoviesList from "./components/WatchedMoviesList";
+import MovieDetails from "./components/MovieDetails";
+import Loader from "./components/Loader";
 
 const tempMovieData = [
     {
@@ -57,6 +59,7 @@ export default function App() {
     const [isLoading, setLoading] = useState(false);
     const [query, setQuery] = useState("spider");
     const [error, setError] = useState(null);
+    const [selectedMovieId, setSelectedMovieId] = useState(null);
 
     useEffect(
         function () {
@@ -92,22 +95,26 @@ export default function App() {
                 <Box>
                     {isLoading && <Loader />}
                     {error && <ErrorMessage errorText={error} />}
-                    {!isLoading && !error && <MoviesList movies={movies} />}
+                    {!isLoading && !error && (
+                        <MoviesList
+                            onSelectMovie={setSelectedMovieId}
+                            movies={movies}
+                        />
+                    )}
                 </Box>
                 <Box>
-                    <WatchedMovieSummery watched={watched} />
-                    <WatchedMoviesList watched={watched} />
+                    {selectedMovieId && (
+                        <MovieDetails selectedId={selectedMovieId} />
+                    )}
+                    {!selectedMovieId && (
+                        <>
+                            <WatchedMovieSummery watched={watched} />
+                            <WatchedMoviesList watched={watched} />
+                        </>
+                    )}
                 </Box>
             </Main>
         </>
-    );
-}
-
-function Loader() {
-    return (
-        <div className="middle-container">
-            <div className="loader"></div>
-        </div>
     );
 }
 

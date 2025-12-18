@@ -1,16 +1,20 @@
-function MoviesList({ movies }) {
+function MoviesList({ movies, onSelectMovie }) {
     return (
         <ul className="list">
             {movies?.map((movie) => (
-                <Movie movie={movie} key={movie.imdbID} />
+                <Movie
+                    onSelectMovie={onSelectMovie}
+                    movie={movie}
+                    key={movie.imdbID}
+                />
             ))}
         </ul>
     );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, onSelectMovie }) {
     return (
-        <li>
+        <li onClick={() => onSelectMovie(movie.imdbID)}>
             <img src={movie.Poster} alt={`${movie.Title} poster`} />
             <h3>{movie.Title}</h3>
             <div>
