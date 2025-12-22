@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react";
 import Loader from "./Loader";
+import StarRating from "./StarRating";
 
 const KEY = `d372492d`;
 const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
 
-function MovieDetails({ selectedId, onCloseMovie }) {
+function MovieDetails({
+    imdbID,
+    onCloseMovie,
+    onAddWatchList,
+    inWatchedList,
+    prevUserRating,
+}) {
     const [movie, setMovie] = useState({});
-    const [isLoading, setLoading] = useState(false);
+    const [isLoading, setLoading] = useState(true);
+    const [userRating, setUserRating] = useState(prevUserRating);
 
     const {
         Title: title,
-        Year: year,
         Poster: poster,
         Runtime: runtime,
         imdbRating,
@@ -21,11 +28,16 @@ function MovieDetails({ selectedId, onCloseMovie }) {
         Genre: genre,
     } = movie;
 
+    const handleAddMovieToWatchList = function () {
+        movie.userRating = userRating;
+        onAddWatchList(movie);
+    };
+
     useEffect(
         function () {
             const fetchMovies = async function () {
                 setLoading(true);
-                const res = await fetch(`${baseURL}&i=${selectedId}`);
+                const res = await fetch(`${baseURL}&i=${imdbID}`);
                 const data = await res.json();
                 setMovie(data);
                 setLoading(false);
@@ -33,7 +45,24 @@ function MovieDetails({ selectedId, onCloseMovie }) {
 
             fetchMovies();
         },
-        [selectedId]
+        [imdbID]
+    );
+
+    useEffect(
+        function () {
+            if (title) {
+                document.title = title;
+            }
+
+            if (isLoading) {
+                document.title = "Loading...";
+            }
+
+            return function () {
+                document.title = "usePopcorn";
+            };
+        },
+        [title, isLoading]
     );
 
     if (isLoading) {
@@ -61,7 +90,27 @@ function MovieDetails({ selectedId, onCloseMovie }) {
                     </div>
                 </header>
                 <section>
-                    <div className="rating">StarRating</div>
+                    <div className="rating">
+                        <StarRating
+                            maxRating={10}
+                            defaultRating={userRating}
+                            rating={userRating}
+                            onRatingChange={setUserRating}
+                        />
+
+                        {(userRating || inWatchedList) && (
+                            <button
+                                className="btn-add"
+                                onClick={handleAddMovieToWatchList}
+                            >
+                                {inWatchedList
+                                    ? prevUserRating !== userRating
+                                        ? "Update Rating"
+                                        : "Added to watched list"
+                                    : "+ Add to WatchList"}
+                            </button>
+                        )}
+                    </div>
                     <p>
                         <em>{plot}</em>
                     </p>
@@ -69,7 +118,6 @@ function MovieDetails({ selectedId, onCloseMovie }) {
                     <p>Directed by {director}</p>
                 </section>
             </>
-            )
         </div>
     );
 }

@@ -55,11 +55,32 @@ const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
 
 export default function App() {
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState([]);
+    const [watched, setWatched] = useState({});
     const [isLoading, setLoading] = useState(false);
     const [query, setQuery] = useState("spider");
     const [error, setError] = useState(null);
     const [selectedMovieId, setSelectedMovieId] = useState(null);
+
+    function handleCloseMovie() {
+        setSelectedMovieId(null);
+    }
+
+    function onAddWatchList(movie) {
+        const watchMovieObj = {
+            imdbID: movie.imdbID,
+            Title: movie.Title,
+            Year: movie.Year,
+            Poster: movie.Poster,
+            runtime: Number(movie.Runtime.split(" ").at(0)),
+            imdbRating: Number(movie.imdbRating),
+            userRating: movie.userRating,
+        };
+
+        setWatched((watched) => ({
+            ...watched,
+            [movie.imdbID]: watchMovieObj,
+        }));
+    }
 
     useEffect(
         function () {
@@ -104,12 +125,28 @@ export default function App() {
                 </Box>
                 <Box>
                     {selectedMovieId && (
-                        <MovieDetails selectedId={selectedMovieId} />
+                        <MovieDetails
+                            imdbID={selectedMovieId}
+                            onCloseMovie={handleCloseMovie}
+                            onAddWatchList={onAddWatchList}
+                            key={selectedMovieId}
+                            inWatchedList={Object.hasOwn(
+                                watched,
+                                selectedMovieId
+                            )}
+                            prevUserRating={
+                                watched[selectedMovieId]?.userRating ?? null
+                            }
+                        />
                     )}
                     {!selectedMovieId && (
                         <>
-                            <WatchedMovieSummery watched={watched} />
-                            <WatchedMoviesList watched={watched} />
+                            <WatchedMovieSummery
+                                watched={Object.values(watched)}
+                            />
+                            <WatchedMoviesList
+                                watched={Object.values(watched)}
+                            />
                         </>
                     )}
                 </Box>
