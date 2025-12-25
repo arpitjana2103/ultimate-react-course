@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Loader from "./Loader";
 import StarRating from "./StarRating";
+import { useKey } from "../hooks/useKey";
 
 const KEY = `d372492d`;
 const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
@@ -62,22 +63,7 @@ function MovieDetails({ imdbID, onCloseMovie, onAddWatchList, watched }) {
         [title, isLoading]
     );
 
-    useEffect(
-        function () {
-            function callback(e) {
-                if (e.code === "Escape") {
-                    onCloseMovie();
-                    console.log("CLOSING");
-                }
-            }
-            document.addEventListener("keydown", callback);
-
-            return function () {
-                document.removeEventListener("keydown", callback);
-            };
-        },
-        [onCloseMovie]
-    );
+    useKey(onCloseMovie, "Escape");
 
     if (isLoading) {
         return <Loader />;
