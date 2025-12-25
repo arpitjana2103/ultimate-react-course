@@ -7,61 +7,17 @@ import WatchedMovieSummery from "./components/WatchedMovieSummery";
 import WatchedMoviesList from "./components/WatchedMoviesList";
 import MovieDetails from "./components/MovieDetails";
 import Loader from "./components/Loader";
-
-const tempMovieData = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt0133093",
-        Title: "The Matrix",
-        Year: "1999",
-        Poster: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt6751668",
-        Title: "Parasite",
-        Year: "2019",
-        Poster: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-    },
-];
-
-const tempWatchedData = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-        runtime: 148,
-        imdbRating: 8.8,
-        userRating: 10,
-    },
-    {
-        imdbID: "tt0088763",
-        Title: "Back to the Future",
-        Year: "1985",
-        Poster: "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-        runtime: 116,
-        imdbRating: 8.5,
-        userRating: 9,
-    },
-];
-
-const KEY = `d372492d`;
-const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
+import { useMovies } from "./hooks/useMovies";
 
 export default function App() {
-    const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState(function () {
         const watched = localStorage.getItem("watched");
         return JSON.parse(watched) || {};
     });
-    const [isLoading, setLoading] = useState(false);
+
     const [query, setQuery] = useState("spider");
-    const [error, setError] = useState(null);
+    const { movies, isLoading, error } = useMovies(query);
+
     const [selectedMovieId, setSelectedMovieId] = useState(null);
 
     function handleCloseMovie() {
@@ -90,41 +46,6 @@ export default function App() {
             localStorage.setItem("watched", JSON.stringify(watched));
         },
         [watched]
-    );
-
-    useEffect(
-        function () {
-            const controller = new AbortController();
-            const fetchMovies = async function () {
-                setLoading(true);
-                setError(null);
-                try {
-                    const res = await fetch(`${baseURL}&s=${query}`, {
-                        signal: controller.signal,
-                    });
-                    const data = await res.json();
-                    const movies = data.Search;
-                    console.log(query, movies);
-                    if (!movies) throw new Error("😵‍💫 Movie Not Found");
-
-                    // setError(null);
-                    setMovies(movies);
-                } catch (error) {
-                    if (error.name === "AbortError") return;
-                    setError(error.message);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            if (query.length > 3) fetchMovies();
-
-            return function () {
-                controller.abort();
-                console.log(query, "Aborted..");
-            };
-        },
-        [query]
     );
 
     return (
