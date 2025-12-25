@@ -55,7 +55,10 @@ const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
 
 export default function App() {
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState({});
+    const [watched, setWatched] = useState(function () {
+        const watched = localStorage.getItem("watched");
+        return JSON.parse(watched) || {};
+    });
     const [isLoading, setLoading] = useState(false);
     const [query, setQuery] = useState("spider");
     const [error, setError] = useState(null);
@@ -81,6 +84,13 @@ export default function App() {
             [movie.imdbID]: watchMovieObj,
         }));
     }
+
+    useEffect(
+        function () {
+            localStorage.setItem("watched", JSON.stringify(watched));
+        },
+        [watched]
+    );
 
     useEffect(
         function () {
@@ -141,14 +151,8 @@ export default function App() {
                             imdbID={selectedMovieId}
                             onCloseMovie={handleCloseMovie}
                             onAddWatchList={onAddWatchList}
+                            watched={watched}
                             key={selectedMovieId}
-                            inWatchedList={Object.hasOwn(
-                                watched,
-                                selectedMovieId
-                            )}
-                            prevUserRating={
-                                watched[selectedMovieId]?.userRating ?? null
-                            }
                         />
                     )}
                     {!selectedMovieId && (

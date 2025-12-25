@@ -5,13 +5,10 @@ import StarRating from "./StarRating";
 const KEY = `d372492d`;
 const baseURL = `http://www.omdbapi.com/?apikey=${KEY}`;
 
-function MovieDetails({
-    imdbID,
-    onCloseMovie,
-    onAddWatchList,
-    inWatchedList,
-    prevUserRating,
-}) {
+function MovieDetails({ imdbID, onCloseMovie, onAddWatchList, watched }) {
+    const prevUserRating = watched[imdbID]?.userRating ?? null;
+    const inWatchedList = watched.hasOwnProperty(imdbID);
+
     const [movie, setMovie] = useState({});
     const [isLoading, setLoading] = useState(true);
     const [userRating, setUserRating] = useState(prevUserRating);
