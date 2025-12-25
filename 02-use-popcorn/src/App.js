@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Logo from "./components/Logo";
 import SearchBox from "./components/SearchBox";
 import MovieLength from "./components/MovieLength";
@@ -8,17 +8,13 @@ import WatchedMoviesList from "./components/WatchedMoviesList";
 import MovieDetails from "./components/MovieDetails";
 import Loader from "./components/Loader";
 import { useMovies } from "./hooks/useMovies";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 export default function App() {
-    const [watched, setWatched] = useState(function () {
-        const watched = localStorage.getItem("watched");
-        return JSON.parse(watched) || {};
-    });
-
     const [query, setQuery] = useState("spider");
-    const { movies, isLoading, error } = useMovies(query);
-
+    const [watched, setWatched] = useLocalStorage({}, "watched");
     const [selectedMovieId, setSelectedMovieId] = useState(null);
+    const { movies, isLoading, error } = useMovies(query);
 
     function handleCloseMovie() {
         setSelectedMovieId(null);
@@ -40,13 +36,6 @@ export default function App() {
             [movie.imdbID]: watchMovieObj,
         }));
     }
-
-    useEffect(
-        function () {
-            localStorage.setItem("watched", JSON.stringify(watched));
-        },
-        [watched]
-    );
 
     return (
         <>
